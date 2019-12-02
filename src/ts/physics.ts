@@ -67,22 +67,28 @@ export class gamePhysics {
 
 
     private keyDown(e) {
-        console.log(e.keyCode);
         switch(e.keyCode) {
             case 49:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/dirt.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.userCamera.buildTexture = new TextureLoader().load("/src/ts/res/blocks/dirt.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 50:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/bricks/time-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.userCamera.buildTexture = new TextureLoader().load("/src/ts/res/blocks/bricks/time-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 51:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/planks/time-1.png")
+                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/planks/time-1-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 52:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/stone/time-1.png")
+                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/stone/time-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 53:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles/time-1.png")
+                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles/time-1.png",() => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 54:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-detail/time-3.png")
+                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-detail/time-3-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 55:
-                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-large/times-3.png")
+                this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-large/time-1-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                break
             case 32:
                 if ( this.canJump === true ) this.velocity.y += 40;
                 this.canJump = false;
