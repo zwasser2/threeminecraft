@@ -50,7 +50,7 @@ export class userCamera {
     }
 
     public highlightBlockLookingAt() {
-        const blockInView = this.getBlockInView()
+        const blockInView: Mesh = this.getBlockInView()
         if (blockInView && this.oldBlock.uuid !== blockInView.uuid) {
             blockInView.material = this.selectedMaterial
             if (this.oldBlock) this.oldBlock.material = this.defaultMaterial
@@ -59,7 +59,7 @@ export class userCamera {
         }
     }
 
-    public getBlockInView() {
+    public getBlockInView(returnWholeObject?: boolean) {
         const newPoint = this.camera.position.clone();
         newPoint.y -= 2
         for (var vertexIndex = 0; vertexIndex < 1; vertexIndex++) {
@@ -67,8 +67,7 @@ export class userCamera {
             ray.setFromCamera(new Vector3(), this.camera)
             var collisionResults = ray.intersectObjects( this.scene.children[0].children );
             if ( collisionResults.length > 0)  {
-                console.log(collisionResults);
-                return  collisionResults[collisionResults.length - 1].object
+                return typeof returnWholeObject === 'undefined' ? collisionResults[0].object : collisionResults[0]
             }
         }
         return undefined

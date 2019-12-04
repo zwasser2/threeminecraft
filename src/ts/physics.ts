@@ -166,10 +166,15 @@ export class gamePhysics {
     }
 
     private placeBlock() {
-        const blockInView = this.userCamera.getBlockInView()
-        const box = new Mesh(new BoxGeometry(2, 2, 2), this.userCamera.buildMaterial)
-        box.position.set(blockInView.position.x, blockInView.position.y + 2, blockInView.position.z)
-        this.scene.add(box)
+        const blockInView = this.userCamera.getBlockInView(true)
+        if (blockInView) {
 
+            const face = blockInView.faceIndex
+            const blockObject = blockInView.object
+            const box = new Mesh(new BoxGeometry(2, 2, 2), this.userCamera.buildMaterial)
+            console.log(blockObject)
+            box.position.set(blockObject.x, blockObject.y + 2, blockObject.z)
+            this.scene.add(box)
+        }
     }
 }

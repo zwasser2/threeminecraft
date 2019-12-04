@@ -50801,6 +50801,7 @@ class BaseScene {
     }
     render() {
         requestAnimationFrame(this.render.bind(this));
+        this.userCamera.highlightBlockLookingAt();
         this.renderer.render(this.scene, this.userCamera.camera);
         this.gamePhysics.doPhysics();
     }
@@ -50822,10 +50823,18 @@ exports.BaseScene = BaseScene;
 Object.defineProperty(exports, "__esModule", { value: true });
 const three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 const PointerLockControls_1 = __webpack_require__(/*! three/examples/jsm/controls/PointerLockControls */ "./node_modules/three/examples/jsm/controls/PointerLockControls.js");
+const three_2 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 class userCamera {
     constructor() {
         this.camera = new three_1.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.controls = new PointerLockControls_1.PointerLockControls(this.camera, document.body);
+        this.defaultTexture = new three_2.TextureLoader().load("src/ts/res/blocks/dirt.png");
+        this.defaultMaterial = new three_2.MeshBasicMaterial({ map: this.defaultTexture });
+        this.buildTexture = this.defaultTexture;
+        this.buildMaterial = this.defaultMaterial;
+        this.selectedDirectTexture = new three_2.TextureLoader().load("src/ts/res/blocks/dirtSelected.png");
+        this.selectedMaterial = new three_2.MeshBasicMaterial({ map: this.selectedDirectTexture });
+        this.oldBlock = new three_1.Mesh();
         this.initialCameraPosition = {
             x: 10,
             y: 100,
@@ -50850,6 +50859,30 @@ class userCamera {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    highlightBlockLookingAt() {
+        const blockInView = this.getBlockInView();
+        if (blockInView && this.oldBlock.uuid !== blockInView.uuid) {
+            //blockInView.material = this.selectedMaterial
+            if (this.oldBlock)
+                this.oldBlock.material = this.defaultMaterial;
+            //this.oldBlock = blockInView
+            // blockInView.material.needsUpdate = true;
+        }
+    }
+    getBlockInView() {
+        const newPoint = this.camera.position.clone();
+        newPoint.y -= 2;
+        for (var vertexIndex = 0; vertexIndex < 1; vertexIndex++) {
+            const ray = new three_2.Raycaster();
+            ray.setFromCamera(new three_2.Vector3(), this.camera);
+            var collisionResults = ray.intersectObjects(this.scene.children[0].children);
+            if (collisionResults.length > 0) {
+                console.log(collisionResults);
+                return collisionResults[collisionResults.length - 1].object;
+            }
+        }
+        return undefined;
     }
 }
 exports.userCamera = userCamera;
@@ -50908,6 +50941,17 @@ class gamePhysics {
         this.scene = scene;
         window.addEventListener('keydown', this.keyDown.bind(this), false);
         window.addEventListener('keyup', this.keyUp.bind(this), false);
+        window.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+                this.placeBlock();
+            }
+            else if (this.userCamera.controls.isLocked) {
+                this.hitBlock();
+            }
+            else {
+                this.userCamera.controls.lock();
+            }
+        }, false);
     }
     doPhysics() {
         if (true) {
@@ -50931,13 +50975,9 @@ class gamePhysics {
             this.userCamera.controls.moveRight(-this.velocity.x * delta);
             this.userCamera.controls.moveForward(-this.velocity.z * delta);
             this.userCamera.controls.getObject().position.y += (this.velocity.y * delta); // new behavior
-            console.log(this.userCamera.controls.getObject().position);
             if (this.isCollisionDetectionGround()) {
-                console.log('turn');
-                console.log(this.velocity.y);
                 this.velocity.y = 0;
                 //this.userCamera.controls.getObject().position.y = 2;
-                console.log(this.userCamera.controls.getObject().position.y);
                 this.canJump = true;
             }
             this.prevTime = time;
@@ -50945,9 +50985,30 @@ class gamePhysics {
     }
     keyDown(e) {
         switch (e.keyCode) {
+            case 49:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("/src/ts/res/blocks/dirt.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 50:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("/src/ts/res/blocks/bricks/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 51:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/planks/time-1-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 52:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/stone/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 53:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 54:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles-detail/time-3-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
+            case 55:
+                this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles-large/time-1-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                break;
             case 32:
                 if (this.canJump === true)
-                    this.velocity.y += 100;
+                    this.velocity.y += 40;
                 this.canJump = false;
                 break;
             case 38: // up
@@ -50967,7 +51028,6 @@ class gamePhysics {
                 this.playerMovement.right = true;
                 break;
             default:
-                console.log('yeet');
         }
     }
     keyUp(e) {
@@ -50989,7 +51049,6 @@ class gamePhysics {
                 this.playerMovement.right = false;
                 break;
             default:
-                console.log('yeet');
         }
     }
     gravityOnUser() {
@@ -50999,13 +51058,30 @@ class gamePhysics {
         const newPoint = this.userCamera.camera.position.clone();
         newPoint.y -= 2;
         for (var vertexIndex = 0; vertexIndex < 1; vertexIndex++) {
-            var ray = new three_1.Raycaster(newPoint, new three_1.Vector3(0, -1, 0), .01, 3);
+            var ray = new three_1.Raycaster(newPoint, new three_1.Vector3(0, -1, 0), 0, 3);
             var collisionResults = ray.intersectObjects(this.scene.children[0].children);
             if (collisionResults.length > 0) {
                 return true;
             }
         }
         return false;
+    }
+    hitBlock() {
+        const blockInView = this.userCamera.getBlockInView();
+        if (blockInView)
+            this.removeBlock(blockInView);
+    }
+    removeBlock(mesh) {
+        this.scene.children[0].remove(mesh);
+        mesh.geometry.dispose();
+        mesh.material.dispose();
+        mesh = undefined;
+    }
+    placeBlock() {
+        const blockInView = this.userCamera.getBlockInView();
+        const box = new three_1.Mesh(new three_1.BoxGeometry(2, 2, 2), this.userCamera.buildMaterial);
+        box.position.set(blockInView.position.x, blockInView.position.y + 2, blockInView.position.z);
+        this.scene.add(box);
     }
 }
 exports.gamePhysics = gamePhysics;
@@ -51035,11 +51111,11 @@ class world {
         const material = new THREE.MeshBasicMaterial({ map: texture });
         for (let i = 0; i < worldSize; i++) {
             for (let j = 0; j < worldSize; j++) {
-                for (let k = 0; k < worldSize; k++) {
-                    box = new three_1.Mesh(new three_1.BoxGeometry(blockSize, blockSize, blockSize), material);
-                    box.position.set(blockSize * i, 0, blockSize * j);
-                    group.add(box);
-                }
+                // for (let k = 0; k < worldSize; k ++) {
+                box = new three_1.Mesh(new three_1.BoxGeometry(blockSize, blockSize, blockSize), material);
+                box.position.set(blockSize * i, 0, blockSize * j);
+                group.add(box);
+                // }
             }
         }
         scene.add(group);
