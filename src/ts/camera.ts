@@ -67,6 +67,8 @@ export class userCamera {
             ray.setFromCamera(new Vector3(), this.camera)
             var collisionResults = ray.intersectObjects( this.scene.children[0].children );
             if ( collisionResults.length > 0)  {
+                // Ray is sorted by distance, so take closest one.
+                console.log(collisionResults[0].faceIndex)
                 return typeof returnWholeObject === 'undefined' ? collisionResults[0].object : collisionResults[0]
             }
         }
