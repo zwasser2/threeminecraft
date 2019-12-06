@@ -46,6 +46,7 @@ export class inventory {
             if (inventorySpace[0] === id && amount + inventorySpace[1] <= maxStackSize) {
                 return index
             } 
+            console.log('testing new terminal script')
         }
         return -1
     }
