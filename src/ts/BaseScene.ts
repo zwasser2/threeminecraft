@@ -14,6 +14,7 @@ import { world } from "./world";
 import { light } from "../light";
 import { userCamera } from "./camera";
 import {gamePhysics} from "./physics";
+import { inventory } from "./inventory"
 
 
 export class BaseScene {
@@ -23,13 +24,14 @@ export class BaseScene {
     private light: light = new light()
     private world: world = new world()
     private gamePhysics: gamePhysics = new gamePhysics()
+    private inventory: inventory = new inventory()
 
 
     constructor() {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(this.renderer.domElement)
         this.world.buildWorld(this.scene)
-        this.gamePhysics.initializePhysics(this.userCamera, this.scene)
+        this.gamePhysics.initializePhysics(this.userCamera, this.scene, this.inventory)
         this.light.initializeLighting(this.scene)
         this.userCamera.initializeCamera(this.scene, this.renderer)
         this.render()

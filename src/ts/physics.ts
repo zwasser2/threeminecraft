@@ -1,8 +1,9 @@
 import {userCamera} from "./camera";
 import {Raycaster, Vector3, Euler, Mesh, BoxGeometry, TextureLoader, MeshBasicMaterial} from "three";
-
+import {inventory} from './inventory'
 export class gamePhysics {
     private userCamera: userCamera
+    private inventory
     private scene
     public playerMovement = {
         forward: false,
@@ -16,13 +17,13 @@ export class gamePhysics {
     public direction = new Vector3();
     public vertex = new Vector3();
 
-
-    public initializePhysics(camera, scene) {
+    public initializePhysics(camera, scene, inventory) {
         this.userCamera = camera
         this.userCamera.camera.rotation.x = 0
         this.userCamera.camera.rotation.y = 0
         this.userCamera.camera.rotation.z = 0
         this.scene = scene
+        this.inventory = inventory
         window.addEventListener('keydown', this.keyDown.bind(this), false)
         window.addEventListener('keyup', this.keyUp.bind(this), false)
         window.addEventListener( 'click', (e) => {
@@ -70,24 +71,32 @@ export class gamePhysics {
         switch(e.keyCode) {
             case 49:
                 this.userCamera.buildTexture = new TextureLoader().load("/src/ts/res/blocks/dirt.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 0
+                console.log(this.inventory)
                 break
             case 50:
                 this.userCamera.buildTexture = new TextureLoader().load("/src/ts/res/blocks/bricks/time-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 1
                 break
             case 51:
                 this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/planks/time-1-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 2
                 break
             case 52:
                 this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/stone/time-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 3
                 break
             case 53:
                 this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles/time-1.png",() => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 4
                 break
             case 54:
                 this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-detail/time-3-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 5
                 break
             case 55:
                 this.userCamera.buildTexture = new TextureLoader().load("src/ts/res/blocks/tiles-large/time-1-1.png", () => {this.userCamera.buildMaterial =  new MeshBasicMaterial({map: this.userCamera.buildTexture})})
+                this.inventory.playerSelectedSlot = 6
                 break
             case 32:
                 if ( this.canJump === true ) this.velocity.y += 40;
@@ -154,7 +163,10 @@ export class gamePhysics {
 
     private hitBlock() {
         const blockInView = this.userCamera.getBlockInView()
-        if (blockInView) this.removeBlock(blockInView)
+        if (blockInView) {
+            this.removeBlock(blockInView)
+            this.inventory.addToInventory(blockInView.material.map.uuid, 20)
+        }
     }
 
 
