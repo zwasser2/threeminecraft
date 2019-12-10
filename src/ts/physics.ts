@@ -162,10 +162,10 @@ export class gamePhysics {
     }
 
     private hitBlock() {
-        const blockInView = this.userCamera.getBlockInView()
+        const blockInView = this.userCamera.getBlockInView().object
         if (blockInView) {
             this.removeBlock(blockInView)
-            this.inventory.addToInventory(blockInView.material.map.uuid, 20)
+            // this.inventory.addToInventory(blockInView.material.map.uuid, 20)
         }
     }
 
@@ -178,7 +178,7 @@ export class gamePhysics {
     }
 
     private placeBlock() {
-        const blockInView = this.userCamera.getBlockInView(true)
+        const blockInView = this.userCamera.getBlockInView()
         if (blockInView) {
             const blockObject = blockInView.object
             const box = new Mesh(new BoxGeometry(2, 2, 2), this.userCamera.buildMaterial)

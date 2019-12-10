@@ -50783,6 +50783,7 @@ const world_1 = __webpack_require__(/*! ./world */ "./src/ts/world.ts");
 const light_1 = __webpack_require__(/*! ../light */ "./src/light.ts");
 const camera_1 = __webpack_require__(/*! ./camera */ "./src/ts/camera.ts");
 const physics_1 = __webpack_require__(/*! ./physics */ "./src/ts/physics.ts");
+const inventory_1 = __webpack_require__(/*! ./inventory */ "./src/ts/inventory.ts");
 class BaseScene {
     constructor() {
         this.scene = new three_1.Scene();
@@ -50791,10 +50792,11 @@ class BaseScene {
         this.light = new light_1.light();
         this.world = new world_1.world();
         this.gamePhysics = new physics_1.gamePhysics();
+        this.inventory = new inventory_1.inventory();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
         this.world.buildWorld(this.scene);
-        this.gamePhysics.initializePhysics(this.userCamera, this.scene);
+        this.gamePhysics.initializePhysics(this.userCamera, this.scene, this.inventory);
         this.light.initializeLighting(this.scene);
         this.userCamera.initializeCamera(this.scene, this.renderer);
         this.render();
@@ -50861,14 +50863,13 @@ class userCamera {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
     highlightBlockLookingAt() {
-        const blockInView = this.getBlockInView();
-        if (blockInView && this.oldBlock.uuid !== blockInView.uuid) {
-            //blockInView.material = this.selectedMaterial
-            if (this.oldBlock)
-                this.oldBlock.material = this.defaultMaterial;
-            //this.oldBlock = blockInView
-            // blockInView.material.needsUpdate = true;
-        }
+        // const blockInView = this.getBlockInView()?.object
+        // if (typeof blockInView !== 'undefined' && this.oldBlock.uuid !== blockInView?.uuid) {
+        //     blockInView.material = this.selectedMaterial
+        //     if (this.oldBlock) this.oldBlock.material = this.defaultMaterial
+        //     this.oldBlock = blockInView
+        //     // blockInView.material.needsUpdate = true;
+        // }
     }
     getBlockInView() {
         const newPoint = this.camera.position.clone();
@@ -50878,8 +50879,8 @@ class userCamera {
             ray.setFromCamera(new three_2.Vector3(), this.camera);
             var collisionResults = ray.intersectObjects(this.scene.children[0].children);
             if (collisionResults.length > 0) {
-                console.log(collisionResults);
-                return collisionResults[collisionResults.length - 1].object;
+                // Ray is sorted by distance, so take closest one.
+                return collisionResults[0];
             }
         }
         return undefined;
@@ -50904,6 +50905,63 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 const BaseScene_1 = __webpack_require__(/*! ./BaseScene */ "./src/ts/BaseScene.ts");
 new BaseScene_1.BaseScene();
+
+
+/***/ }),
+
+/***/ "./src/ts/inventory.ts":
+/*!*****************************!*\
+  !*** ./src/ts/inventory.ts ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const maxStackSize = 64;
+class inventory {
+    constructor() {
+        this.userInventory = new Array(64).fill([undefined, undefined]);
+        this.playerSelectedSlot = 0;
+    }
+    // Reduce this to hash table?
+    addToInventory(id, amount) {
+        for (const [index, inventorySpace] of this.userInventory.entries()) {
+            const stackIndex = this.findAvaliableLocationNewMaterials(id, amount);
+            const nextEmptyIndex = this.findNextEmptyLocation();
+            console.log(stackIndex);
+            console.log(nextEmptyIndex);
+            //TODO MERGE NEXTEMPTYINDEX LOGIC INTO FIND NEXT EMPTY LOCATION LOGIC
+            if (stackIndex !== -1) {
+                this.userInventory[index][1] += amount;
+                return 1;
+            }
+            else if (nextEmptyIndex !== -1) {
+                this.userInventory[stackIndex] = [id, amount];
+                return 1;
+            }
+            return -1;
+        }
+    }
+    findNextEmptyLocation() {
+        for (const [index, inventorySpace] of this.userInventory.entries()) {
+            if (typeof inventorySpace[0] === 'undefined') {
+                return index;
+            }
+        }
+        return -1;
+    }
+    findAvaliableLocationNewMaterials(id, amount) {
+        for (const [index, inventorySpace] of this.userInventory.entries()) {
+            if (inventorySpace[0] === id && amount + inventorySpace[1] <= maxStackSize) {
+                return index;
+            }
+        }
+        return -1;
+    }
+}
+exports.inventory = inventory;
 
 
 /***/ }),
@@ -50933,12 +50991,13 @@ class gamePhysics {
         this.direction = new three_1.Vector3();
         this.vertex = new three_1.Vector3();
     }
-    initializePhysics(camera, scene) {
+    initializePhysics(camera, scene, inventory) {
         this.userCamera = camera;
         this.userCamera.camera.rotation.x = 0;
         this.userCamera.camera.rotation.y = 0;
         this.userCamera.camera.rotation.z = 0;
         this.scene = scene;
+        this.inventory = inventory;
         window.addEventListener('keydown', this.keyDown.bind(this), false);
         window.addEventListener('keyup', this.keyUp.bind(this), false);
         window.addEventListener('click', (e) => {
@@ -50987,24 +51046,32 @@ class gamePhysics {
         switch (e.keyCode) {
             case 49:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("/src/ts/res/blocks/dirt.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 0;
+                console.log(this.inventory);
                 break;
             case 50:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("/src/ts/res/blocks/bricks/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 1;
                 break;
             case 51:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/planks/time-1-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 2;
                 break;
             case 52:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/stone/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 3;
                 break;
             case 53:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles/time-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 4;
                 break;
             case 54:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles-detail/time-3-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 5;
                 break;
             case 55:
                 this.userCamera.buildTexture = new three_1.TextureLoader().load("src/ts/res/blocks/tiles-large/time-1-1.png", () => { this.userCamera.buildMaterial = new three_1.MeshBasicMaterial({ map: this.userCamera.buildTexture }); });
+                this.inventory.playerSelectedSlot = 6;
                 break;
             case 32:
                 if (this.canJump === true)
@@ -51067,9 +51134,11 @@ class gamePhysics {
         return false;
     }
     hitBlock() {
-        const blockInView = this.userCamera.getBlockInView();
-        if (blockInView)
+        const blockInView = this.userCamera.getBlockInView().object;
+        if (blockInView) {
             this.removeBlock(blockInView);
+            // this.inventory.addToInventory(blockInView.material.map.uuid, 20)
+        }
     }
     removeBlock(mesh) {
         this.scene.children[0].remove(mesh);
@@ -51079,9 +51148,12 @@ class gamePhysics {
     }
     placeBlock() {
         const blockInView = this.userCamera.getBlockInView();
-        const box = new three_1.Mesh(new three_1.BoxGeometry(2, 2, 2), this.userCamera.buildMaterial);
-        box.position.set(blockInView.position.x, blockInView.position.y + 2, blockInView.position.z);
-        this.scene.add(box);
+        if (blockInView) {
+            const blockObject = blockInView.object;
+            const box = new three_1.Mesh(new three_1.BoxGeometry(2, 2, 2), this.userCamera.buildMaterial);
+            box.position.set(blockObject.position.x, blockObject.position.y + 2, blockObject.position.z);
+            this.scene.children[0].add(box);
+        }
     }
 }
 exports.gamePhysics = gamePhysics;

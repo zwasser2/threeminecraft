@@ -1,4 +1,4 @@
-import {BoxGeometry, Mesh, PerspectiveCamera} from "three";
+import {BoxGeometry, Mesh, PerspectiveCamera, Object3D, Intersection} from "three";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
 import {
     Scene,
@@ -50,16 +50,15 @@ export class userCamera {
     }
 
     public highlightBlockLookingAt() {
-        const blockInView: Mesh = this.getBlockInView()
-        if (blockInView && this.oldBlock.uuid !== blockInView.uuid) {
-            blockInView.material = this.selectedMaterial
-            if (this.oldBlock) this.oldBlock.material = this.defaultMaterial
-            this.oldBlock = blockInView
-            // blockInView.material.needsUpdate = true;
-        }
+        // const blockInView = this.getBlockInView()?.object
+        // if (typeof blockInView !== 'undefined' && this.oldBlock.uuid !== blockInView?.uuid) {
+        //     blockInView.material = this.selectedMaterial
+        //     if (this.oldBlock) this.oldBlock.material = this.defaultMaterial
+        //     this.oldBlock = blockInView
+        // }
     }
 
-    public getBlockInView(returnWholeObject?: boolean) {
+    public getBlockInView() {
         const newPoint = this.camera.position.clone();
         newPoint.y -= 2
         for (var vertexIndex = 0; vertexIndex < 1; vertexIndex++) {
@@ -68,7 +67,7 @@ export class userCamera {
             var collisionResults = ray.intersectObjects( this.scene.children[0].children );
             if ( collisionResults.length > 0)  {
                 // Ray is sorted by distance, so take closest one.
-                return typeof returnWholeObject === 'undefined' ? collisionResults[0].object : collisionResults[0]
+                return collisionResults[0]
             }
         }
         return undefined

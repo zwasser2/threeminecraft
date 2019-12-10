@@ -33,6 +33,7 @@ export class inventory {
     }
 
     public findNextEmptyLocation() {
+        
         for (const [index, inventorySpace] of this.userInventory.entries()) {
             if (typeof inventorySpace[0] === 'undefined') {
                 return index
@@ -46,7 +47,6 @@ export class inventory {
             if (inventorySpace[0] === id && amount + inventorySpace[1] <= maxStackSize) {
                 return index
             } 
-            console.log('testing new terminal script')
         }
         return -1
     }
