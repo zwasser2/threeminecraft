@@ -31,13 +31,10 @@
     "typescript": "latest",
     "webpack": "latest",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "latest",
-    "webworkify": "^1.5.0",
-    "worker-loader": "^2.0.0"
+    "webpack-dev-server": "latest"
   },
   "dependencies": {
     "@types/three": "latest",
-    "physijs-webpack": "^0.1.4",
     "three": "latest"
   }
 }

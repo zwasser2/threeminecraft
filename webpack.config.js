@@ -19,10 +19,10 @@ const BrowserSyncPluginConfig = new BrowserSyncPlugin({
 /* Configure ProgressBar */
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
 const ProgressBarPluginConfig = new ProgressBarPlugin()
-
+//_15htm3SJsn5h25boXNna1u
 /* Export configuration */
 module.exports = {
-    mode: 'development',
+    mode: 'none',
     devtool: 'source-map',
     entry: [
         './src/ts/index.ts'
